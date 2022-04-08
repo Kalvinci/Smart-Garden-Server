@@ -1,5 +1,5 @@
-require("dotenv").config();
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 mongoose
 	.connect(process.env.CONNECTION_URL)
@@ -69,24 +69,37 @@ async function setPlant(plantDetails) {
 		return plant;
 	} catch (error) {
 		console.log("Error while setting plant", error);
+		if (error.message.includes("duplicate"))
+			throw new Error(`Rack ${plantDetails.rackId} is occupied!`);
 		throw error;
 	}
 }
 
 async function editPlant(plantDetails) {
 	try {
-		let plant = await Plants.findOne({ rackId: plantDetails.rackId });
-		if (!plant) throw new Error(`No plant exists in rack ${rackId}`);
-		plant.name = plantDetails.name;
-		plant.temperature = plantDetails.temperature;
-		plant.humidity = plantDetails.humidity;
-		plant.water = plantDetails.water;
-		plant.light = plantDetails.light;
-		plant = await plant.save();
+		console.log(plantDetails.updateProperty);
+		const result = await Plants.findOneAndUpdate(
+			{ rackId: plantDetails.rackId },
+			plantDetails.updateProperty
+		);
+		if (!result) throw new Error(`No plant exists in rack ${rackId}`);
 		console.log("Plant updated successfully!");
-		return plant;
+		return "Plant updated successfully!";
 	} catch (error) {
 		console.log("Error while setting plant", error);
+		throw new Error(`No plant exists in rack ${plantDetails.rackId}`);
+	}
+}
+
+async function removePlant(rackId) {
+	try {
+		let plant = await Plants.findOne({ rackId }, "name");
+		if (!plant) throw new Error(`No plant exists in rack ${rackId}`);
+		await Plants.deleteOne({ rackId });
+		console.log("Plant removed successfully!");
+		return `${plant.name} has been removed from rack ${rackId}!`;
+	} catch (error) {
+		console.log("Error while removing plant", error);
 		throw error;
 	}
 }
@@ -95,3 +108,4 @@ exports.listPlants = listPlants;
 exports.getPlantInfo = getPlantInfo;
 exports.setPlant = setPlant;
 exports.editPlant = editPlant;
+exports.removePlant = removePlant;

@@ -4,6 +4,7 @@ const {
 	getPlantInfo,
 	setPlant,
 	editPlant,
+	removePlant,
 } = require("./plantService");
 
 const port = process.env.PORT || 3000;
@@ -48,6 +49,16 @@ app.post("/editplant", async (req, res) => {
 	try {
 		const plantDetails = req.body;
 		const response = await editPlant(plantDetails);
+		return res.send(response);
+	} catch (error) {
+		res.status(400).send(error.message);
+	}
+});
+
+app.post("/removeplant", async (req, res) => {
+	try {
+		const rackId = req.body.rackId;
+		const response = await removePlant(rackId);
 		return res.send(response);
 	} catch (error) {
 		res.status(400).send(error.message);
