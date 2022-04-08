@@ -1,4 +1,5 @@
 const express = require("express");
+// const { writeToSerialPort } = require("./arduinoService");
 const {
 	listPlants,
 	getPlantInfo,
@@ -39,6 +40,8 @@ app.post("/setplant", async (req, res) => {
 	try {
 		const plantDetails = req.body;
 		const response = await setPlant(plantDetails);
+		// JSON.stringify(plantDetails);
+		// writeToSerialPort(plantDetails);
 		return res.send(response);
 	} catch (error) {
 		res.status(400).send(error.message);
