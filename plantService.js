@@ -37,7 +37,9 @@ const Plants = new mongoose.model(process.env.COLLECTION_NAME, plantSchema);
 
 async function listPlants() {
 	try {
-		const plants = await Plants.find({}, { _id: false, __v: false }).exec();
+		const plants = await Plants.find({}, { _id: false, __v: false })
+			.sort({ rackId: "asc" })
+			.exec();
 		console.log("Plants retrieved successfully!");
 		return plants;
 	} catch (error) {
@@ -77,7 +79,6 @@ async function setPlant(plantDetails) {
 
 async function editPlant(plantDetails) {
 	try {
-		console.log(plantDetails.updateProperty);
 		const result = await Plants.findOneAndUpdate(
 			{ rackId: plantDetails.rackId },
 			plantDetails.updateProperty
