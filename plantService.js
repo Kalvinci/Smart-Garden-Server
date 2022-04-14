@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { writeToSerialPort } = require("./arduinoService");
 require("dotenv").config();
 
 mongoose
@@ -105,8 +106,20 @@ async function removePlant(rackId) {
 	}
 }
 
+function waterPlant(rackId) {
+	const data = JSON.stringify({ action: "WATER", rackId });
+	writeToSerialPort(data);
+}
+
+function lightPlant(rackId, state) {
+	const data = JSON.stringify({ action: "LIGHT", state, rackId });
+	writeToSerialPort(data);
+}
+
 exports.listPlants = listPlants;
 exports.getPlantInfo = getPlantInfo;
 exports.setPlant = setPlant;
 exports.editPlant = editPlant;
 exports.removePlant = removePlant;
+exports.waterPlant = waterPlant;
+exports.lightPlant = lightPlant;

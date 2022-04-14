@@ -1,11 +1,12 @@
 const express = require("express");
-// const { writeToSerialPort } = require("./arduinoService");
 const {
 	listPlants,
 	getPlantInfo,
 	setPlant,
 	editPlant,
 	removePlant,
+	waterPlant,
+	lightPlant,
 } = require("./plantService");
 
 const port = process.env.PORT || 3000;
@@ -40,8 +41,6 @@ app.post("/setplant", async (req, res) => {
 	try {
 		const plantDetails = req.body;
 		const response = await setPlant(plantDetails);
-		// JSON.stringify(plantDetails);
-		// writeToSerialPort(plantDetails);
 		return res.send(response);
 	} catch (error) {
 		res.status(400).send(error.message);
@@ -68,9 +67,17 @@ app.post("/removeplant", async (req, res) => {
 	}
 });
 
-app.post("/water/:rackId", (req, res) => {});
+app.post("/water", (req, res) => {
+	const { rackId } = req.body;
+	waterPlant(rackId);
+	return res.send(`Plant in rack ${rackId} watered`);
+});
 
-app.post("/light/:rackId", (req, res) => {});
+app.post("/light", (req, res) => {
+	const { rackId, state } = req.body;
+	lightPlant(rackId, state);
+	return res.send(`Lights turned ${state} in rack ${rackId}`);
+});
 
 app.post("/humidity/:rackId", (req, res) => {});
 
