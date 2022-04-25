@@ -17,15 +17,15 @@ const plantSchema = new mongoose.Schema({
 		required: true,
 	},
 	temperature: {
-		type: Number,
+		type: String,
 		required: true,
 	},
 	humidity: {
-		type: Number,
+		type: String,
 		required: true,
 	},
-	water: {
-		type: Number,
+	moisture: {
+		type: String,
 		required: true,
 	},
 	light: {
@@ -51,13 +51,12 @@ async function listPlants() {
 
 async function getPlantInfo(rackId) {
 	try {
-		let plant = await Plants.findOne(
-			{ rackId },
-			{ _id: false, __v: false }
-		);
+		let plant = await getPlantDBData(rackId);
 		if (!plant) throw new Error(`No plant exists in rack ${rackId}`);
-		console.log("Plant info retrieved successfully!");
-		return plant;
+		const data = JSON.stringify({ action: "PLANT_INFO", rackId });
+		writeToSerialPort(data);
+		console.log("Retrieving plant info!");
+		return "Hang tight! I am getting you the plant info :)";
 	} catch (error) {
 		console.log("Error while retrieving plant", error);
 		throw error;
@@ -69,6 +68,8 @@ async function setPlant(plantDetails) {
 		let plant = new Plants(plantDetails);
 		plant = await plant.save();
 		console.log("Plant set successfully!");
+		const data = JSON.stringify({ action: "SET_PLANT", ...plantDetails });
+		writeToSerialPort(data);
 		return plant;
 	} catch (error) {
 		console.log("Error while setting plant", error);
@@ -85,6 +86,8 @@ async function editPlant(plantDetails) {
 			plantDetails.updateProperty
 		);
 		if (!result) throw new Error(`No plant exists in rack ${rackId}`);
+		const data = JSON.stringify({ action: "EDIT_PLANT", ...plantDetails });
+		writeToSerialPort(data);
 		console.log("Plant updated successfully!");
 		return "Plant updated successfully!";
 	} catch (error) {
@@ -112,8 +115,17 @@ function waterPlant(rackId) {
 }
 
 function lightPlant(rackId, state) {
-	const data = JSON.stringify({ action: "LIGHT", state, rackId });
+	const data = JSON.stringify({
+		action: "LIGHT",
+		state,
+		rackId,
+	});
 	writeToSerialPort(data);
+}
+
+async function getPlantDBData(rackId) {
+	let plant = await Plants.findOne({ rackId }, { _id: false, __v: false });
+	return plant;
 }
 
 exports.listPlants = listPlants;
@@ -123,3 +135,4 @@ exports.editPlant = editPlant;
 exports.removePlant = removePlant;
 exports.waterPlant = waterPlant;
 exports.lightPlant = lightPlant;
+exports.getPlantDBData = getPlantDBData;

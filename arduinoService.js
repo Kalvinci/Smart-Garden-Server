@@ -15,7 +15,13 @@ arduinoSerialPort.on("open", () => {
 const parser = new ReadlineParser();
 arduinoSerialPort.pipe(parser);
 parser.on("data", (message) => {
-	sendNotification(message);
+	try {
+		console.log(message);
+		const jsonMessage = JSON.parse(message);
+		if (jsonMessage.action === "NOTIFY") {
+			sendNotification(jsonMessage.type, jsonMessage.data);
+		}
+	} catch {}
 });
 
 function writeToSerialPort(jsonData) {
