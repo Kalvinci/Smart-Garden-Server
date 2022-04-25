@@ -1,4 +1,5 @@
 const express = require("express");
+const { exec } = require("child_process");
 const {
 	listPlants,
 	getPlantInfo,
@@ -10,7 +11,7 @@ const {
 } = require("./plantService");
 
 const port = process.env.PORT || 3000;
-
+var cp = require('child_process');
 const app = express();
 app.use(express.json());
 
@@ -31,6 +32,19 @@ app.get("/plantinfo/:rackId", async (req, res) => {
 	try {
 		const rackId = req.params.rackId;
 		const response = await getPlantInfo(rackId);
+		const { exec } = require("child_process");
+		cp.exec('./checkPlant.sh', (error, stdout, stderr) => {
+		  // catch err, stdout, stderr
+		   // if (error) {
+		   //     console.log('Error in removing files');
+		   //     return;
+		   // }
+		   // if (stderr) {
+		   //     console.log('an error with file system');
+		   //     return;
+		   // }
+		   // console.log('Result of shell script execution',stdout);
+		});
 		return res.send(response);
 	} catch (error) {
 		res.status(400).send(error.message);
