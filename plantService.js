@@ -20,9 +20,6 @@ async function getPlantInfo(rackId) {
 		let plant = await getPlantData(rackId);
 		if (!plant) throw new Error(`No plant exists in rack ${rackId}`);
 		const { stderr } = await exec("./checkPlant.sh");
-		if (stderr) {
-			throw new Error(stderr);
-		}
 		const data = JSON.stringify({ action: "PLANT_INFO", rackId });
 		writeToSerialPort(data);
 		console.log("Retrieving plant info!");

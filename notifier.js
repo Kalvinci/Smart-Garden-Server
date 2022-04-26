@@ -66,7 +66,7 @@ async function getPostData(type, data) {
 						},
 					],
 					image: {
-						url: `${BASE_URL}/images/plant.jpg`,
+						url: `${process.env.BASE_URL}/images/plant.jpg`,
 					},
 					timestamp: new Date(),
 				},
