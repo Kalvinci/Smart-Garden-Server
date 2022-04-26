@@ -1,40 +1,6 @@
-const mongoose = require("mongoose");
+const { exec } = require("child_process");
+const { Plants, getPlantData } = require("./dbService");
 const { writeToSerialPort } = require("./arduinoService");
-require("dotenv").config();
-
-mongoose
-	.connect(process.env.CONNECTION_URL)
-	.catch((error) => console.log("mongodb connection error", error));
-
-const plantSchema = new mongoose.Schema({
-	rackId: {
-		type: Number,
-		required: true,
-		unique: true,
-	},
-	name: {
-		type: String,
-		required: true,
-	},
-	temperature: {
-		type: String,
-		required: true,
-	},
-	humidity: {
-		type: String,
-		required: true,
-	},
-	moisture: {
-		type: String,
-		required: true,
-	},
-	light: {
-		type: String,
-		required: true,
-	},
-});
-
-const Plants = new mongoose.model(process.env.COLLECTION_NAME, plantSchema);
 
 async function listPlants() {
 	try {
@@ -51,12 +17,16 @@ async function listPlants() {
 
 async function getPlantInfo(rackId) {
 	try {
-		let plant = await getPlantDBData(rackId);
+		let plant = await getPlantData(rackId);
 		if (!plant) throw new Error(`No plant exists in rack ${rackId}`);
+		const { stderr } = await exec("./checkPlant.sh");
+		if (stderr) {
+			throw new Error(stderr);
+		}
 		const data = JSON.stringify({ action: "PLANT_INFO", rackId });
 		writeToSerialPort(data);
 		console.log("Retrieving plant info!");
-		return "Hang tight! I am getting you the plant info :)";
+		return "Hang tight! I'm getting you the plant info :)";
 	} catch (error) {
 		console.log("Error while retrieving plant", error);
 		throw error;
@@ -123,11 +93,6 @@ function lightPlant(rackId, state) {
 	writeToSerialPort(data);
 }
 
-async function getPlantDBData(rackId) {
-	let plant = await Plants.findOne({ rackId }, { _id: false, __v: false });
-	return plant;
-}
-
 exports.listPlants = listPlants;
 exports.getPlantInfo = getPlantInfo;
 exports.setPlant = setPlant;
@@ -135,4 +100,3 @@ exports.editPlant = editPlant;
 exports.removePlant = removePlant;
 exports.waterPlant = waterPlant;
 exports.lightPlant = lightPlant;
-exports.getPlantDBData = getPlantDBData;

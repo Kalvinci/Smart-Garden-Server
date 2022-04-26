@@ -1,10 +1,6 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
+const { getPlantData } = require("./dbService");
 require("dotenv").config();
-
-mongoose
-	.connect(process.env.CONNECTION_URL)
-	.catch((error) => console.log("mongodb connection error", error));
 
 async function sendNotification(type, data) {
 	try {
@@ -31,7 +27,7 @@ async function getPostData(type, data) {
 			],
 		};
 	} else if (type === "PLANT_INFO") {
-		const plantDBData = await getPlantDBData(data.rackId);
+		const plantDBData = await getPlantData(data.rackId);
 		postData = {
 			content: `I have got you the info of plant in rack ${data.rackId} :smiley:`,
 			embeds: [
@@ -70,7 +66,7 @@ async function getPostData(type, data) {
 						},
 					],
 					image: {
-						url: "https://www.thespruce.com/thmb/_6OfTexQcyd-3aW8Z1O2y78sc-Q=/2048x1545/filters:fill(auto,1)/snake-plant-care-overview-1902772-04-d3990a1d0e1d4202a824e929abb12fc1-349b52d646f04f31962707a703b94298.jpeg",
+						url: `${BASE_URL}/images/plant.jpg`,
 					},
 					timestamp: new Date(),
 				},
@@ -78,12 +74,6 @@ async function getPostData(type, data) {
 		};
 	}
 	return postData;
-}
-
-async function getPlantDBData(rackId) {
-	const Plants = new mongoose.model(process.env.COLLECTION_NAME);
-	let plant = await Plants.findOne({ rackId }, { _id: false, __v: false });
-	return plant;
 }
 
 exports.sendNotification = sendNotification;

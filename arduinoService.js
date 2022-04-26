@@ -21,7 +21,9 @@ parser.on("data", (message) => {
 		if (jsonMessage.action === "NOTIFY") {
 			sendNotification(jsonMessage.type, jsonMessage.data);
 		}
-	} catch {}
+	} catch {
+		console.log(error);
+	}
 });
 
 function writeToSerialPort(jsonData) {
